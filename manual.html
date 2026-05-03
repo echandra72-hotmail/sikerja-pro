@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Manual SiKerja Pro</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#f8fafc;color:#1e293b;display:flex}
+:root{--blue:#2563eb;--pink:#ec4899;--grad:linear-gradient(135deg,#2563eb,#ec4899);--grad2:linear-gradient(135deg,#1e40af,#db2777);--sub:#64748b;--gray:#f8fafc;--gray2:#e2e8f0}
+
+/* SIDEBAR */
+#toc{width:240px;min-width:240px;background:var(--grad2);height:100vh;position:sticky;top:0;overflow-y:auto;padding:24px 0}
+#toc h2{color:#fff;font-size:1rem;font-weight:700;padding:0 20px 16px;border-bottom:1px solid rgba(255,255,255,.15);margin-bottom:8px}
+#toc a{display:block;padding:8px 20px;color:rgba(255,255,255,.8);text-decoration:none;font-size:.84rem;transition:.15s;border-left:3px solid transparent}
+#toc a:hover{background:rgba(255,255,255,.15);color:#fff;border-left-color:#fff}
+#toc a.active{background:rgba(255,255,255,.2);color:#fff;border-left-color:#fff}
+#toc .tocNum{display:inline-block;width:20px;font-size:.76rem;opacity:.7}
+
+/* MAIN */
+#mainDoc{flex:1;padding:40px 48px;max-width:860px;overflow-y:auto}
+.docHeader{margin-bottom:40px;padding-bottom:24px;border-bottom:2px solid var(--gray2)}
+.docHeader h1{font-size:1.8rem;font-weight:800;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px}
+.docHeader p{color:var(--sub);font-size:.9rem}
+.badge-version{display:inline-block;background:var(--grad);color:#fff;padding:3px 12px;border-radius:20px;font-size:.76rem;font-weight:600;margin-top:8px}
+
+/* SECTIONS */
+.section{margin-bottom:48px;scroll-margin-top:24px}
+.section h2{font-size:1.15rem;font-weight:700;color:#1e293b;margin-bottom:16px;display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:2px solid var(--gray2)}
+.section h2 .sNum{width:28px;height:28px;background:var(--grad);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.8rem;font-weight:700;flex-shrink:0}
+.section h3{font-size:.92rem;font-weight:700;color:#1e293b;margin:16px 0 8px}
+
+/* CARDS */
+.cardRow{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+.statCard{background:#fff;border-radius:10px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.07);text-align:center}
+.statCard .icon{font-size:1.6rem;margin-bottom:4px}
+.statCard h4{font-size:.82rem;font-weight:700;color:#1e293b}
+.statCard p{font-size:.74rem;color:var(--sub);margin-top:2px}
+
+/* TABLE */
+table{width:100%;border-collapse:collapse;font-size:.83rem;margin-bottom:12px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+th{text-align:left;padding:10px 14px;background:var(--gray);color:var(--sub);font-weight:600;border-bottom:2px solid var(--gray2)}
+td{padding:9px 14px;border-bottom:1px solid var(--gray2);vertical-align:top}
+tr:last-child td{border:none}
+
+/* STEPS */
+.steps{counter-reset:step;margin-bottom:12px}
+.step{display:flex;gap:12px;margin-bottom:10px;align-items:flex-start}
+.step .stepNum{width:24px;height:24px;background:var(--grad);border-radius:50%;color:#fff;font-size:.76rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.step p{font-size:.84rem;color:#1e293b;line-height:1.5}
+
+/* CALLOUT */
+.callout{border-radius:8px;padding:12px 16px;margin:12px 0;font-size:.83rem;display:flex;gap:10px;align-items:flex-start}
+.callout.info{background:#eff6ff;border-left:4px solid var(--blue);color:#1e40af}
+.callout.warn{background:#fef3c7;border-left:4px solid #f59e0b;color:#92400e}
+.callout.danger{background:#fee2e2;border-left:4px solid #ef4444;color:#991b1b}
+.callout.tip{background:#d1fae5;border-left:4px solid #10b981;color:#065f46}
+
+/* BADGE */
+.badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:.74rem;font-weight:600}
+.b-admin{background:#ede9fe;color:#7c3aed}
+.b-asisten{background:#dbeafe;color:#2563eb}
+.b-lock{background:#f1f5f9;color:#64748b}
+.b-urgent{background:#fee2e2;color:#dc2626}
+.b-done{background:#d1fae5;color:#059669}
+
+/* VIEW CARDS */
+.viewCards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:10px 0}
+.viewCard{background:#fff;border-radius:8px;padding:12px;box-shadow:0 1px 6px rgba(0,0,0,.07);text-align:center}
+.viewCard .ico{font-size:1.4rem;margin-bottom:4px}
+.viewCard h5{font-size:.8rem;font-weight:700;color:#1e293b}
+.viewCard p{font-size:.73rem;color:var(--sub);margin-top:2px}
+
+/* ROLE TABLE */
+.roleRow{display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--gray2);font-size:.83rem}
+.roleRow:last-child{border:none}
+.roleRow .rName{width:120px;font-weight:600}
+</style>
+</head>
+<body>
+
+<!-- TOC SIDEBAR -->
+<div id="toc">
+  <h2>📊 SiKerja Pro</h2>
+  <a href="#s1"><span class="tocNum">1.</span> Login</a>
+  <a href="#s2"><span class="tocNum">2.</span> Dashboard</a>
+  <a href="#s3"><span class="tocNum">3.</span> Klien</a>
+  <a href="#s4"><span class="tocNum">4.</span> Pekerjaan</a>
+  <a href="#s5"><span class="tocNum">5.</span> Detail Pekerjaan</a>
+  <a href="#s6"><span class="tocNum">6.</span> Docs</a>
+  <a href="#s7"><span class="tocNum">7.</span> Absensi</a>
+  <a href="#s8"><span class="tocNum">8.</span> Manajemen User</a>
+  <a href="#s9"><span class="tocNum">9.</span> Notifikasi</a>
+  <a href="#s10"><span class="tocNum">10.</span> Hak Akses</a>
+</div>
+
+<!-- MAIN DOC -->
+<div id="mainDoc">
+  <div class="docHeader">
+    <h1>Manual Pengguna SiKerja Pro</h1>
+    <p>Sistem Manajemen Pekerjaan & Produktivitas Tim Akuntansi</p>
+    <span class="badge-version">Versi 1.0</span>
+  </div>
+
+  <!-- 1. LOGIN -->
+  <div class="section" id="s1">
+    <h2><span class="sNum">1</span> Login</h2>
+    <div class="steps">
+      <div class="step"><div class="stepNum">1</div><p>Buka aplikasi SiKerja Pro di browser</p></div>
+      <div class="step"><div class="stepNum">2</div><p>Pilih nama Anda dari dropdown <b>"Pilih User"</b></p></div>
+      <div class="step"><div class="stepNum">3</div><p>Masukkan PIN jika ada — kosongkan jika tidak memakai PIN</p></div>
+      <div class="step"><div class="stepNum">4</div><p>Klik tombol <b>"Masuk →"</b></p></div>
+      <div class="step"><div class="stepNum">5</div><p>Sistem otomatis mencatat absensi masuk Anda hari ini</p></div>
+    </div>
+    <div class="callout warn">⚠️ Jika dropdown kosong atau muncul pesan error koneksi, hubungi Admin untuk memastikan data user sudah tersedia.</div>
+  </div>
+
+  <!-- 2. DASHBOARD -->
+  <div class="section" id="s2">
+    <h2><span class="sNum">2</span> Dashboard</h2>
+    <p style="font-size:.84rem;color:var(--sub);margin-bottom:14px">Halaman utama yang menampilkan ringkasan kondisi pekerjaan tim hari ini.</p>
+    <div class="cardRow">
+      <div class="statCard"><div class="icon">🏢</div><h4>Total Klien</h4><p>Jumlah klien terdaftar</p></div>
+      <div class="statCard"><div class="icon">📋</div><h4>Total Pekerjaan</h4><p>Seluruh pekerjaan</p></div>
+      <div class="statCard"><div class="icon">🔴</div><h4>Urgent</h4><p>Belum selesai & urgent</p></div>
+      <div class="statCard"><div class="icon">✅</div><h4>Selesai</h4><p>Pekerjaan selesai</p></div>
+      <div class="statCard"><div class="icon">⏱️</div><h4>Waktu Kerja</h4><p>Total kerja hari ini</p></div>
+    </div>
+    <p style="font-size:.84rem;margin-top:4px">Dashboard juga menampilkan <b>Absensi Hari Ini</b>, daftar <b>Pekerjaan Urgent</b>, dan pekerjaan dengan <b>Deadline 7 Hari</b> ke depan.</p>
+  </div>
+
+  <!-- 3. KLIEN -->
+  <div class="section" id="s3">
+    <h2><span class="sNum">3</span> Klien <span class="badge b-admin" style="font-size:.72rem;margin-left:4px">Admin Only</span></h2>
+    <div class="callout danger">⛔ Menu ini hanya dapat diakses dan dilihat oleh Admin. User dengan role Asisten tidak akan melihat menu Klien di sidebar.</div>
+    <h3>Menambah Klien Baru</h3>
+    <div class="steps">
+      <div class="step"><div class="stepNum">1</div><p>Klik tombol <b>"+ Tambah Klien"</b></p></div>
+      <div class="step"><div class="stepNum">2</div><p>Isi form: <b>Nama Perusahaan</b> (wajib), NPWP, Bidang Usaha, PIC, No. Kontak, Catatan</p></div>
+      <div class="step"><div class="stepNum">3</div><p>Klik <b>"💾 Simpan"</b></p></div>
+    </div>
+    <h3>Fitur Lainnya</h3>
+    <table>
+      <tr><th>Fitur</th><th>Cara Penggunaan</th></tr>
+      <tr><td>🔍 Cari Klien</td><td>Ketik nama, NPWP, atau PIC di kolom pencarian</td></tr>
+      <tr><td>✏️ Edit Klien</td><td>Klik tombol ✏️ pada baris klien</td></tr>
+      <tr><td>🗑️ Hapus Klien</td><td>Klik tombol 🗑️ pada baris klien</td></tr>
+      <tr><td>📄 Jumlah Baris</td><td>Pilih 10 / 15 / 20 baris di bagian bawah tabel</td></tr>
+    </table>
+  </div>
+
+  <!-- 4. PEKERJAAN -->
+  <div class="section" id="s4">
+    <h2><span class="sNum">4</span> Pekerjaan</h2>
+    <p style="font-size:.84rem;color:var(--sub);margin-bottom:14px">Halaman untuk mencatat log pekerjaan yang sudah dilakukan dan merencanakan pekerjaan mendatang.</p>
+    <h3>Menambah Pekerjaan</h3>
+    <div class="steps">
+      <div class="step"><div class="stepNum">1</div><p>Klik tombol <b>"+ Tambah"</b></p></div>
+      <div class="step"><div class="stepNum">2</div><p>Isi <b>Judul</b> dan pilih <b>Klien</b> (keduanya wajib diisi)</p></div>
+      <div class="step"><div class="stepNum">3</div><p>Isi Kategori, Penanggung Jawab, Asisten, Status, Prioritas, Tanggal, Deadline, dan Catatan sesuai kebutuhan</p></div>
+      <div class="step"><div class="stepNum">4</div><p>Klik <b>"💾 Simpan"</b></p></div>
+    </div>
+    <h3>Pilihan Tampilan</h3>
+    <div class="viewCards">
+      <div class="viewCard"><div class="ico">☰</div><h5>List</h5><p>Tabel detail semua pekerjaan</p></div>
+      <div class="viewCard"><div class="ico">⊞</div><h5>Board</h5><p>Kanban — drag & drop antar status</p></div>
+      <div class="viewCard"><div class="ico">📅</div><h5>Kalender</h5><p>Lihat pekerjaan per tanggal</p></div>
+    </div>
+    <h3>Filter & Pencarian</h3>
+    <p style="font-size:.84rem;margin-bottom:8px">Gunakan filter di atas tabel untuk menyaring berdasarkan Klien, Status, Prioritas, atau User. Pilih jumlah baris 10 / 15 / 20 di bawah tabel.</p>
+    <div class="callout info">💡 Pekerjaan yang terkunci ditandai ikon 🔒 — artinya Anda tidak memiliki hak untuk mengubah atau menghapusnya.</div>
+  </div>
+
+  <!-- 5. DETAIL -->
+  <div class="section" id="s5">
+    <h2><span class="sNum">5</span> Detail Pekerjaan</h2>
+    <p style="font-size:.84rem;color:var(--sub);margin-bottom:14px">Klik baris pekerjaan mana saja untuk membuka panel detail di sebelah kanan layar.</p>
+    <table>
+      <tr><th>Fitur</th><th>Fungsi</th></tr>
+      <tr><td>⏱️ <b>Time Tracker</b></td><td>Klik ▶ Mulai untuk menghitung waktu kerja, ⏹ Stop untuk menyimpan. Riwayat waktu tercatat otomatis.</td></tr>
+      <tr><td>☑️ <b>Subtasks</b></td><td>Tambah dan centang subtask pekerjaan. Hapus subtask dengan tombol ✕.</td></tr>
+      <tr><td>💬 <b>Komentar</b></td><td>Tulis catatan atau diskusi. Tekan Enter atau klik Kirim. Semua user bisa membaca dan menulis komentar.</td></tr>
+      <tr><td>🔄 <b>Ubah Status</b></td><td>Klik untuk berganti status: Belum Dimulai → Dalam Proses → Selesai.</td></tr>
+    </table>
+  </div>
+
+  <!-- 6. DOCS -->
+  <div class="section" id="s6">
+    <h2><span class="sNum">6</span> Docs</h2>
+    <p style="font-size:.84rem;color:var(--sub);margin-bottom:14px">Buat dan simpan catatan atau dokumen bebas, bisa dikaitkan ke klien tertentu.</p>
+    <div class="steps">
+      <div class="step"><div class="stepNum">1</div><p>Klik <b>"+ Baru"</b> untuk membuat dokumen baru</p></div>
+      <div class="step"><div class="stepNum">2</div><p>Isi judul dan isi dokumen</p></div>
+      <div class="step"><div class="stepNum">3</div><p>Pilih klien terkait (opsional)</p></div>
+      <div class="step"><div class="stepNum">4</div><p>Klik <b>"💾 Simpan"</b></p></div>
+    </div>
+    <div class="callout tip">💡 Klik dokumen yang sudah ada untuk membuka dan mengedit kembali.</div>
+  </div>
+
+  <!-- 7. ABSENSI -->
+  <div class="section" id="s7">
+    <h2><span class="sNum">7</span> Absensi</h2>
+    <table>
+      <tr><th>Jenis</th><th>Keterangan</th></tr>
+      <tr><td>🟢 <b>Otomatis</b></td><td>Dicatat saat user berhasil login setiap hari</td></tr>
+      <tr><td>✍️ <b>Manual</b></td><td>Klik "+ Manual", pilih user, tanggal, dan jam masuk</td></tr>
+    </table>
+    <p style="font-size:.84rem;margin-top:8px">Riwayat absensi ditampilkan secara berurutan dari tanggal terbaru.</p>
+  </div>
+
+  <!-- 8. USERS -->
+  <div class="section" id="s8">
+    <h2><span class="sNum">8</span> Manajemen User <span class="badge b-admin" style="font-size:.72rem;margin-left:4px">Admin Only</span></h2>
+    <div class="callout danger">⛔ Menu ini hanya dapat diakses dan dilihat oleh Admin.</div>
+    <h3>Menambah User Baru</h3>
+    <div class="steps">
+      <div class="step"><div class="stepNum">1</div><p>Klik <b>"+ Tambah User"</b></p></div>
+      <div class="step"><div class="stepNum">2</div><p>Isi Nama, pilih Role, dan PIN (opsional)</p></div>
+      <div class="step"><div class="stepNum">3</div><p>Klik <b>"💾 Simpan"</b></p></div>
+    </div>
+    <h3>Role User</h3>
+    <table>
+      <tr><th>Role</th><th>Akses</th></tr>
+      <tr><td><span class="badge b-admin">Admin / Akuntan</span></td><td>Akses penuh ke semua menu, data klien, manajemen user, dan seluruh pekerjaan</td></tr>
+      <tr><td><span class="badge b-asisten">Asisten</span></td><td>Akses terbatas — tidak melihat menu Klien & Users, hanya bisa edit pekerjaan milik sendiri</td></tr>
+    </table>
+  </div>
+
+  <!-- 9. NOTIFIKASI -->
+  <div class="section" id="s9">
+    <h2><span class="sNum">9</span> Notifikasi</h2>
+    <p style="font-size:.84rem;color:var(--sub);margin-bottom:12px">Klik ikon 🔔 di pojok kanan atas untuk melihat notifikasi aktif.</p>
+    <table>
+      <tr><th>Notifikasi</th><th>Keterangan</th></tr>
+      <tr><td>⚠️ Melewati Deadline</td><td>Pekerjaan yang sudah lewat tanggal deadline</td></tr>
+      <tr><td>⏰ Deadline Mendekat</td><td>Pekerjaan dengan deadline dalam 3 hari ke depan</td></tr>
+      <tr><td>🔴 Urgent</td><td>Pekerjaan dengan prioritas Urgent yang belum selesai</td></tr>
+    </table>
+  </div>
+
+  <!-- 10. HAK AKSES -->
+  <div class="section" id="s10">
+    <h2><span class="sNum">10</span> Ringkasan Hak Akses</h2>
+    <table>
+      <tr><th>Fitur</th><th>Admin</th><th>Asisten</th></tr>
+      <tr><td>Dashboard</td><td>✅</td><td>✅</td></tr>
+      <tr><td>Pekerjaan — Lihat</td><td>✅</td><td>✅</td></tr>
+      <tr><td>Pekerjaan — Tambah</td><td>✅</td><td>✅</td></tr>
+      <tr><td>Pekerjaan — Edit/Hapus milik sendiri</td><td>✅</td><td>✅</td></tr>
+      <tr><td>Pekerjaan — Edit/Hapus milik orang lain</td><td>✅</td><td>🔒</td></tr>
+      <tr><td>Docs</td><td>✅</td><td>✅</td></tr>
+      <tr><td>Absensi</td><td>✅</td><td>✅</td></tr>
+      <tr><td>Klien — Lihat/Tambah/Edit/Hapus</td><td>✅</td><td>🔒</td></tr>
+      <tr><td>Manajemen User</td><td>✅</td><td>🔒</td></tr>
+    </table>
+    <div class="callout tip">💡 Logout dengan klik tombol <b>"🚪 Keluar"</b> di bagian bawah sidebar.</div>
+  </div>
+
+  <div style="text-align:center;padding:24px 0;color:var(--sub);font-size:.8rem;border-top:1px solid var(--gray2);margin-top:24px">
+    SiKerja Pro — Sistem Manajemen Akuntansi & Produktivitas
+  </div>
+</div>
+
+<script>
+// Highlight active TOC
+const sections=document.querySelectorAll('.section');
+const links=document.querySelectorAll('#toc a');
+window.addEventListener('scroll',()=>{
+  let cur='';
+  sections.forEach(s=>{if(window.scrollY>=s.offsetTop-60)cur=s.id;});
+  links.forEach(l=>{l.classList.toggle('active',l.getAttribute('href')==='#'+cur);});
+},{passive:true});
+</script>
+</body>
+</html>

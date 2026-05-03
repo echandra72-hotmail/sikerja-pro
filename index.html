@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>SiKerja Akuntansi Pro</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}
+:root{
+  --blue:#2563eb;--blue2:#1e40af;--pink:#ec4899;--pink2:#db2777;
+  --grad:linear-gradient(135deg,#2563eb,#ec4899);
+  --grad2:linear-gradient(135deg,#1e40af,#db2777);
+  --gray:#f8fafc;--gray2:#e2e8f0;--text:#1e293b;--sub:#64748b;
+  --green:#10b981;--orange:#f59e0b;--red:#ef4444;
+}
+#loginScreen{position:fixed;inset:0;background:var(--grad);display:flex;align-items:center;justify-content:center;z-index:999}
+.loginBox{background:#fff;border-radius:20px;padding:40px;width:360px;box-shadow:0 20px 60px rgba(0,0,0,.2);text-align:center}
+.loginBox h1{font-size:1.6rem;color:var(--text);margin-bottom:4px}
+.loginBox p{color:var(--sub);font-size:.9rem;margin-bottom:24px}
+.loginBox select,.loginBox input{width:100%;padding:12px 14px;border:1.5px solid var(--gray2);border-radius:10px;font-size:.95rem;margin-bottom:12px;outline:none;color:var(--text)}
+.loginBox select:focus,.loginBox input:focus{border-color:var(--blue)}
+.btnLogin{width:100%;padding:13px;background:var(--grad);color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:600;cursor:pointer}
+.loginLogo{width:60px;height:60px;background:var(--grad);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:1.8rem}
+body{display:flex;height:100vh;overflow:hidden;background:var(--gray)}
+#sidebar{width:240px;min-width:240px;background:var(--grad2);display:flex;flex-direction:column;z-index:10}
+.sideTop{padding:20px 20px 14px;border-bottom:1px solid rgba(255,255,255,.15)}
+.sideTop h2{color:#fff;font-size:1.05rem;font-weight:700}
+.sideTop p{color:rgba(255,255,255,.65);font-size:.72rem;margin-top:1px}
+.userBadge{margin:10px 16px;background:rgba(255,255,255,.15);border-radius:10px;padding:9px 12px;display:flex;align-items:center;gap:9px}
+.userAvatar{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:.88rem;flex-shrink:0}
+.userInfo p{color:#fff;font-size:.82rem;font-weight:600}
+.userInfo span{color:rgba(255,255,255,.65);font-size:.7rem}
+/* SIDEBAR SCROLL */
+nav{flex:1;padding:6px 10px;overflow-y:auto;scroll-behavior:smooth}
+nav a{display:flex;align-items:center;gap:9px;padding:10px 11px;border-radius:9px;color:rgba(255,255,255,.8);text-decoration:none;font-size:.85rem;margin-bottom:1px;cursor:pointer;transition:.15s}
+nav a:hover,nav a.active{background:rgba(255,255,255,.2);color:#fff}
+nav a .ico{font-size:1rem;width:20px;text-align:center}
+.sideBottom{padding:10px 16px;border-top:1px solid rgba(255,255,255,.15)}
+.btnLogout{width:100%;padding:8px;background:rgba(255,255,255,.15);border:none;border-radius:8px;color:#fff;font-size:.82rem;cursor:pointer}
+.btnLogout:hover{background:rgba(255,255,255,.25)}
+#main{flex:1;overflow-y:auto;position:relative;display:flex;flex-direction:column}
+.topbar{background:#fff;padding:13px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--gray2);position:sticky;top:0;z-index:5}
+.topbar h3{font-size:1rem;color:var(--text);font-weight:700}
+.content{padding:20px 24px;flex:1;position:relative}
+.bgDeco{position:fixed;bottom:0;right:0;width:300px;height:200px;background:var(--grad);opacity:.07;border-radius:100% 0 0 0;pointer-events:none;z-index:0}
+.bgDeco2{position:fixed;bottom:0;right:0;width:160px;height:110px;background:var(--grad);opacity:.09;border-radius:100% 0 0 0;pointer-events:none;z-index:0}
+.cardGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:20px;position:relative;z-index:1}
+.card{background:#fff;border-radius:13px;padding:18px;box-shadow:0 2px 10px rgba(0,0,0,.06);position:relative;overflow:hidden}
+.card .cardIcon{font-size:1.6rem;margin-bottom:6px}
+.card .cardVal{font-size:1.7rem;font-weight:800;color:var(--text)}
+.card .cardLabel{font-size:.76rem;color:var(--sub);margin-top:1px}
+.card .cardAccent{position:absolute;right:-10px;bottom:-10px;width:55px;height:55px;border-radius:50%;opacity:.13}
+.acc-blue{background:var(--blue)}.acc-pink{background:var(--pink)}.acc-green{background:var(--green)}.acc-orange{background:var(--orange)}
+.section{background:#fff;border-radius:13px;padding:18px;box-shadow:0 2px 10px rgba(0,0,0,.06);margin-bottom:16px;position:relative;z-index:1}
+.secHead{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.secHead h4{font-size:.9rem;font-weight:700;color:var(--text)}
+table{width:100%;border-collapse:collapse;font-size:.8rem}
+th{text-align:left;padding:7px 10px;color:var(--sub);font-weight:600;border-bottom:2px solid var(--gray2);white-space:nowrap}
+td{padding:8px 10px;border-bottom:1px solid var(--gray2);color:var(--text);vertical-align:middle}
+tr:last-child td{border:none}
+tr:hover td{background:#fafafa}
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:.72rem;font-weight:600}
+.b-urgent{background:#fee2e2;color:#dc2626}.b-normal{background:#dbeafe;color:#2563eb}
+.b-done{background:#d1fae5;color:#059669}.b-progress{background:#fef3c7;color:#d97706}
+.b-plan{background:#ede9fe;color:#7c3aed}.b-green{background:#d1fae5;color:#059669}
+.formGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.formGroup{display:flex;flex-direction:column;gap:3px}
+.formGroup.full{grid-column:1/-1}
+label{font-size:.76rem;color:var(--sub);font-weight:600}
+input,select,textarea{padding:8px 10px;border:1.5px solid var(--gray2);border-radius:7px;font-size:.84rem;color:var(--text);outline:none;background:#fff}
+input:focus,select:focus,textarea:focus{border-color:var(--blue)}
+textarea{resize:vertical;min-height:60px}
+.btnPrimary{padding:9px 18px;background:var(--grad);color:#fff;border:none;border-radius:7px;font-size:.84rem;font-weight:600;cursor:pointer;white-space:nowrap}
+.btnPrimary:hover{opacity:.9}
+.btnSm{padding:5px 10px;border:none;border-radius:5px;font-size:.74rem;cursor:pointer;margin-right:3px}
+.btnEdit{background:#dbeafe;color:#2563eb}.btnDanger{background:#fee2e2;color:#dc2626}.btnGray{background:var(--gray2);color:var(--sub)}
+.filterBar{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.filterBar select,.filterBar input{padding:6px 9px;font-size:.79rem;border-radius:6px}
+.viewToggle{display:flex;gap:4px;background:var(--gray);border-radius:8px;padding:3px}
+.viewBtn{padding:5px 12px;border:none;border-radius:6px;font-size:.78rem;cursor:pointer;color:var(--sub);background:transparent;transition:.15s}
+.viewBtn.active{background:#fff;color:var(--text);font-weight:600;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.kanbanWrap{display:flex;gap:14px;overflow-x:auto;padding-bottom:8px}
+.kanbanCol{min-width:230px;max-width:230px;background:var(--gray);border-radius:10px;padding:10px}
+.kanbanCol h5{font-size:.8rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+.kanbanCard{background:#fff;border-radius:8px;padding:10px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.07);cursor:grab;border-left:3px solid transparent}
+.kanbanCard.urgent{border-left-color:var(--red)}.kanbanCard.normal{border-left-color:var(--blue)}
+.kanbanCard h6{font-size:.8rem;font-weight:600;color:var(--text);margin-bottom:4px}
+.kanbanCard p{font-size:.72rem;color:var(--sub)}
+.kanbanCard .cardMeta{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+.calWrap{overflow-x:auto}
+.calGrid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;min-width:560px}
+.calHead{text-align:center;padding:6px;font-size:.74rem;font-weight:700;color:var(--sub)}
+.calCell{min-height:80px;background:var(--gray);border-radius:6px;padding:4px;font-size:.72rem}
+.calCell.today{background:#eff6ff;border:1.5px solid var(--blue)}
+.calDate{font-weight:700;color:var(--text);margin-bottom:2px}
+.calEvent{background:var(--blue);color:#fff;border-radius:3px;padding:1px 4px;margin-bottom:1px;font-size:.68rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.calEvent.urgent{background:var(--red)}
+.timerBar{display:flex;align-items:center;gap:10px;background:var(--gray);border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:.82rem}
+.timerDisplay{font-size:1.1rem;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;min-width:70px}
+.btnTimer{padding:6px 14px;border:none;border-radius:6px;font-size:.8rem;font-weight:600;cursor:pointer}
+.btnStart{background:#d1fae5;color:#059669}.btnStop{background:#fee2e2;color:#dc2626}
+.subtaskList{margin-top:8px;border-top:1px solid var(--gray2);padding-top:8px}
+.subtaskItem{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--gray2);font-size:.8rem}
+.subtaskItem:last-child{border:none}
+.subtaskItem input[type=checkbox]{width:15px;height:15px;accent-color:var(--blue);cursor:pointer}
+.subtaskItem span.done{text-decoration:line-through;color:var(--sub)}
+.commentList{margin-top:8px}
+.commentItem{display:flex;gap:8px;margin-bottom:10px}
+.commentAvatar{width:28px;height:28px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.72rem;font-weight:700;flex-shrink:0}
+.commentBody{flex:1;background:var(--gray);border-radius:8px;padding:8px 10px}
+.commentBody .cmeta{font-size:.72rem;color:var(--sub);margin-bottom:3px}
+.commentBody p{font-size:.8rem;color:var(--text)}
+.commentInput{display:flex;gap:8px;margin-top:8px}
+.commentInput input{flex:1;padding:7px 10px;border:1.5px solid var(--gray2);border-radius:7px;font-size:.82rem}
+.docList{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.docCard{background:#fff;border-radius:10px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.07);cursor:pointer;border:1.5px solid transparent;transition:.15s}
+.docCard:hover{border-color:var(--blue)}
+.docCard .docIcon{font-size:1.6rem;margin-bottom:6px}
+.docCard h6{font-size:.84rem;font-weight:700;color:var(--text);margin-bottom:3px}
+.docCard p{font-size:.74rem;color:var(--sub)}
+.docEditor{background:#fff;border-radius:10px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,.07)}
+.docEditor input.docTitle{font-size:1.2rem;font-weight:700;border:none;outline:none;width:100%;color:var(--text);margin-bottom:10px;border-bottom:2px solid var(--gray2);padding-bottom:8px}
+.docEditor textarea.docBody{width:100%;min-height:300px;border:none;outline:none;font-size:.88rem;color:var(--text);resize:none;line-height:1.7}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:flex;align-items:center;justify-content:center}
+.modalBox{background:#fff;border-radius:16px;padding:24px;width:580px;max-width:96vw;max-height:92vh;overflow-y:auto}
+.modalBox h4{font-size:.95rem;font-weight:700;color:var(--text);margin-bottom:16px}
+.abToday{display:flex;flex-wrap:wrap;gap:8px}
+.abCard{background:var(--gray);border-radius:9px;padding:9px 12px;font-size:.79rem;display:flex;align-items:center;gap:7px}
+.abCard .dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0}
+.abCard .dot.absent{background:var(--gray2)}
+.detailPanel{position:fixed;right:0;top:0;bottom:0;width:420px;background:#fff;box-shadow:-4px 0 24px rgba(0,0,0,.12);z-index:50;overflow-y:auto;transform:translateX(100%);transition:.25s}
+.detailPanel.open{transform:translateX(0)}
+.detailTop{padding:18px 20px;border-bottom:1px solid var(--gray2);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:1}
+.detailBody{padding:18px 20px}
+.detailSection{margin-bottom:16px}
+.detailSection h5{font-size:.78rem;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.notifDot{width:7px;height:7px;background:var(--red);border-radius:50%;display:inline-block;margin-left:4px;vertical-align:middle}
+.notifList{position:absolute;right:0;top:100%;background:#fff;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);width:300px;z-index:20;padding:10px 0;display:none}
+.notifList.open{display:block}
+.notifItem{padding:10px 16px;font-size:.8rem;border-bottom:1px solid var(--gray2);cursor:pointer}
+.notifItem:last-child{border:none}
+.notifItem:hover{background:var(--gray)}
+.notifItem .ni-title{font-weight:600;color:var(--text)}
+.notifItem .ni-sub{color:var(--sub);font-size:.74rem;margin-top:2px}
+.notifBtn{position:relative;background:none;border:none;cursor:pointer;font-size:1.2rem;padding:4px}
+/* PAGINATION */
+.pagination{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:.82rem;color:var(--sub)}
+.pagination select{padding:4px 8px;border:1.5px solid var(--gray2);border-radius:6px;font-size:.8rem}
+.pagination span{margin-left:auto}
+.rowsLabel{font-size:.8rem;color:var(--sub)}
+/* LOCK BADGE */
+.lockBadge{font-size:.68rem;color:var(--sub);margin-left:4px}
+.hidden{display:none!important}
+.mt10{margin-top:10px}
+.flex{display:flex;gap:8px;align-items:center}
+.progressBar{height:6px;background:var(--gray2);border-radius:3px;margin-top:6px}
+.progressFill{height:100%;border-radius:3px;background:var(--grad)}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.7rem;background:#ede9fe;color:#7c3aed;margin-right:3px}
+.toast{position:fixed;bottom:24px;right:24px;background:#1e293b;color:#fff;padding:12px 20px;border-radius:10px;font-size:.84rem;z-index:999;opacity:0;transition:.3s;pointer-events:none}
+.toast.show{opacity:1}
+.accessDenied{text-align:center;padding:60px 20px;color:var(--sub)}
+.accessDenied .icon{font-size:3rem;margin-bottom:12px}
+.accessDenied p{font-size:.9rem}
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div class="loginBox">
+    <div class="loginLogo">📊</div>
+    <h1>SiKerja Pro</h1>
+    <p>Manajemen Akuntansi & Produktivitas</p>
+    <select id="loginUser"><option value="">⏳ Memuat user...</option></select>
+    <input type="password" id="loginPin" placeholder="PIN (kosongkan jika tidak ada)"/>
+    <button class="btnLogin" onclick="doLogin()">Masuk →</button>
+    <p id="loginErr" style="color:#dc2626;font-size:.8rem;margin-top:8px"></p>
+  </div>
+</div>
+
+<div id="sidebar">
+  <div class="sideTop"><h2>📊 SiKerja Pro</h2><p>Akuntansi & Produktivitas</p></div>
+  <div class="userBadge">
+    <div class="userAvatar" id="sideAvatar">?</div>
+    <div class="userInfo"><p id="sideName">-</p><span id="sideRole">-</span></div>
+  </div>
+    <nav id="sideNav">
+    <a onclick="showPage('dashboard')" class="active"><span class="ico">🏠</span> Dashboard</a>
+    <a onclick="showPage('klien')" id="navKlien"><span class="ico">🏢</span> Klien</a>
+    <a onclick="showPage('pekerjaan')"><span class="ico">📋</span> Pekerjaan</a>
+    <a onclick="showPage('docs')"><span class="ico">📝</span> Docs</a>
+    <a onclick="showPage('absensi')"><span class="ico">🕐</span> Absensi</a>
+    <a onclick="showPage('users')" id="navUsers"><span class="ico">👥</span> Users</a>
+    <a onclick="showPage('manual')"><span class="ico">📖</span> Manual</a>
+  </nav>
+  <div class="sideBottom"><button class="btnLogout" onclick="doLogout()">🚪 Keluar</button></div>
+</div>
+
+<div id="main">
+  <div class="bgDeco"></div><div class="bgDeco2"></div>
+  <div class="topbar">
+    <h3 id="pageTitle">Dashboard</h3>
+    <div class="flex">
+      <span id="pageDate"></span>
+      <div style="position:relative">
+        <button class="notifBtn" onclick="toggleNotif()" id="notifBtn">🔔<span class="notifDot" id="notifDot" style="display:none"></span></button>
+        <div class="notifList" id="notifList"></div>
+      </div>
+    </div>
+  </div>
+  <div class="content" id="pageContent"><div style="padding:40px;text-align:center;color:var(--sub)">⏳ Memuat...</div></div>
+</div>
+
+<div class="detailPanel" id="detailPanel">
+  <div class="detailTop">
+    <h4 id="detailTitle" style="font-size:.95rem;font-weight:700;color:var(--text)">Detail</h4>
+    <button onclick="closeDetail()" style="background:none;border:none;cursor:pointer;font-size:1.2rem">✕</button>
+  </div>
+  <div class="detailBody" id="detailBody"></div>
+</div>
+
+<div class="modal hidden" id="modalWrap">
+  <div class="modalBox" id="modalBox"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPA_URL = 'https://tgiqjfoacjkgddbdfasl.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRnaXFqZm9hY2prZ2RkYmRmYXNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3MjE3OTYsImV4cCI6MjA5MzI5Nzc5Nn0.if1yTvoy7kqYICreVt7I-pfhcw6cMIgvEzAreR4ZXwY';
+const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+let currentUser = null, currentPage = 'dashboard', currentView = 'list';
+let timerInterval = null, timerStart = null, timerPekId = null, timerElapsed = 0;
+let dragId = null;
+let CACHE = {users:[],klien:[],pekerjaan:[],absensi:[],docs:[],comments:[],timelogs:[]};
+let rowsPerPageKlien = 10, rowsPerPagePek = 10;
+let pageKlien = 1, pagePek = 1;
+
+// ===== UTILS =====
+const isAdmin    = () => currentUser && currentUser.role === 'admin';
+const todayStr   = () => new Date().toISOString().split('T')[0];
+const nowTime    = () => new Date().toTimeString().slice(0,5);
+const fmtDate    = s => { if(!s)return'-'; const[y,m,d]=s.split('T')[0].split('-'); return`${d}/${m}/${y}`; };
+const fmtDateL   = s => { if(!s)return'-'; const mo=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des']; const[y,m,d]=s.split('T')[0].split('-'); return`${d} ${mo[+m-1]} ${y}`; };
+const pageDate   = () => { const d=new Date(); const dy=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu']; const mo=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember']; return`${dy[d.getDay()]}, ${d.getDate()} ${mo[d.getMonth()]} ${d.getFullYear()}`; };
+const fmtDur     = s => { const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sc=s%60; return`${h>0?h+'j ':''} ${m}m ${sc}s`.trim(); };
+const badgeSt    = s => s==='Selesai'?'b-done':s==='Dalam Proses'?'b-progress':'b-plan';
+
+function canEditPek(p){
+  if(!currentUser) return false;
+  if(isAdmin()) return true;
+  // non-admin hanya bisa edit pekerjaan yang dibuat sendiri
+  return p.created_by === currentUser.id;
+}
+
+function toast(msg,dur=2500){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),dur);
+}
+
+// ===== LOAD =====
+async function loadAll(){
+  const [u,k,p,a,d,c,tl] = await Promise.all([
+    sb.from('users').select('*').order('created_at'),
+    sb.from('klien').select('*').order('nama'),
+    sb.from('pekerjaan').select('*').order('created_at'),
+    sb.from('absensi').select('*').order('tanggal',{ascending:false}),
+    sb.from('docs').select('*').order('updated_at',{ascending:false}),
+    sb.from('comments').select('*').order('created_at'),
+    sb.from('timelogs').select('*').order('created_at'),
+  ]);
+  CACHE.users     = u.data||[];
+  CACHE.klien     = k.data||[];
+  CACHE.pekerjaan = p.data||[];
+  CACHE.absensi   = a.data||[];
+  CACHE.docs      = d.data||[];
+  CACHE.comments  = c.data||[];
+  CACHE.timelogs  = tl.data||[];
+}
+
+// ===== LOGIN =====
+async function initLogin(){
+  const sel=document.getElementById('loginUser');
+  const err=document.getElementById('loginErr');
+  sel.innerHTML='<option value="">⏳ Memuat user...</option>';
+  try{
+    const {data,error}=await sb.from('users').select('*').order('created_at');
+    if(error) throw error;
+    const users=data||[];
+    sel.innerHTML='<option value="">-- Pilih User --</option>';
+    if(!users.length){ err.textContent='⚠️ Belum ada user. Jalankan SQL insert user di Supabase.'; return; }
+    users.forEach(u=>{ const o=document.createElement('option'); o.value=u.id; o.textContent=u.nama+(u.role==='admin'?' (Admin)':' (Asisten)'); sel.appendChild(o); });
+    err.textContent='';
+  }catch(e){
+    sel.innerHTML='<option value="">-- Gagal memuat --</option>';
+    err.textContent='❌ Koneksi Supabase gagal: '+(e.message||e);
+  }
+}
+
+async function doLogin(){
+  const uid=document.getElementById('loginUser').value;
+  const pin=document.getElementById('loginPin').value;
+  const err=document.getElementById('loginErr');
+  err.textContent='';
+  if(!uid){ err.textContent='Pilih user terlebih dahulu!'; return; }
+  const {data:users}=await sb.from('users').select('*').eq('id',uid);
+  const user=users&&users[0];
+  if(!user){ err.textContent='User tidak ditemukan!'; return; }
+  if(user.pin&&user.pin!==pin){ err.textContent='PIN salah!'; return; }
+  currentUser=user;
+  const today=todayStr();
+  const {data:abCek}=await sb.from('absensi').select('id').eq('user_id',uid).eq('tanggal',today);
+  if(!abCek||!abCek.length) await sb.from('absensi').insert({user_id:uid,nama:user.nama,tanggal:today,jam:nowTime(),tipe:'Masuk'});
+  await loadAll();
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('sideAvatar').textContent=user.nama.charAt(0).toUpperCase();
+  document.getElementById('sideName').textContent=user.nama;
+  document.getElementById('sideRole').textContent=user.role==='admin'?'Admin / Akuntan':'Asisten';
+  // sembunyikan menu Klien untuk non-admin
+  document.getElementById('navKlien').style.display=isAdmin()?'flex':'none';
+  document.getElementById('navUsers').style.display=isAdmin()?'flex':'none';
+  showPage('dashboard');
+}
+
+function doLogout(){
+  stopTimer(); currentUser=null;
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('loginPin').value='';
+  initLogin();
+}
+
+// ===== NAVIGATE =====
+function showPage(p){
+  // proteksi halaman klien untuk non-admin
+  if(p==='klien'&&!isAdmin()){ toast('⛔ Akses hanya untuk Admin'); return; }
+  if(p==='users'&&!isAdmin()){ toast('⛔ Akses hanya untuk Admin'); return; }
+  currentPage=p;
+  document.querySelectorAll('nav a').forEach((a,i)=>{
+    a.classList.toggle('active',['dashboard','klien','pekerjaan','docs','absensi','users'][i]===p);
+  });
+  const titles={dashboard:'Dashboard',klien:'Manajemen Klien',pekerjaan:'Log & Rencana Pekerjaan',docs:'Docs',absensi:'Absensi',users:'Manajemen User',manual:'Manual Pengguna'};
+  document.getElementById('pageTitle').textContent=titles[p];
+  document.getElementById('pageDate').textContent=pageDate();
+  closeDetail();
+  const c=document.getElementById('pageContent');
+  if(p==='dashboard')   c.innerHTML=renderDashboard();
+  else if(p==='klien')  c.innerHTML=renderKlien();
+  else if(p==='pekerjaan') c.innerHTML=renderPekerjaan();
+  else if(p==='docs')   c.innerHTML=renderDocs();
+  else if(p==='absensi') c.innerHTML=renderAbsensi();
+  else if(p==='users')  c.innerHTML=renderUsers();
+  else if(p==='manual') c.innerHTML=renderManual();
+  renderNotifs();
+}
+
+// ===== DASHBOARD =====
+function renderDashboard(){
+  const today=todayStr();
+  const totalK=CACHE.klien.length;
+  const totalP=CACHE.pekerjaan.filter(p=>!p.parent_id).length;
+  const urgent=CACHE.pekerjaan.filter(p=>p.prioritas==='Urgent'&&p.status!=='Selesai'&&!p.parent_id).length;
+  const selesai=CACHE.pekerjaan.filter(p=>p.status==='Selesai'&&!p.parent_id).length;
+  const abHariIni=CACHE.absensi.filter(a=>a.tanggal===today);
+  const totalSec=CACHE.timelogs.filter(t=>t.tanggal===today).reduce((s,t)=>s+(t.durasi||0),0);
+  const abHtml=CACHE.users.map(u=>{ const ab=abHariIni.find(a=>a.user_id===u.id); return`<div class="abCard"><div class="dot${ab?'':' absent'}"></div><div><b>${u.nama}</b><br><span style="color:var(--sub);font-size:.72rem">${ab?'Masuk '+ab.jam:'Belum masuk'}</span></div></div>`; }).join('');
+  const soon=new Date(); soon.setDate(soon.getDate()+7);
+  const soonList=CACHE.pekerjaan.filter(p=>p.deadline&&p.status!=='Selesai'&&new Date(p.deadline)<=soon&&new Date(p.deadline)>=new Date()&&!p.parent_id).slice(0,4);
+  const urgList=CACHE.pekerjaan.filter(p=>p.prioritas==='Urgent'&&p.status!=='Selesai'&&!p.parent_id).slice(0,4);
+  return`
+  <div class="cardGrid">
+    <div class="card"><div class="cardIcon">🏢</div><div class="cardVal">${totalK}</div><div class="cardLabel">Total Klien</div><div class="cardAccent acc-blue"></div></div>
+    <div class="card"><div class="cardIcon">📋</div><div class="cardVal">${totalP}</div><div class="cardLabel">Total Pekerjaan</div><div class="cardAccent acc-pink"></div></div>
+    <div class="card"><div class="cardIcon">🔴</div><div class="cardVal">${urgent}</div><div class="cardLabel">Urgent</div><div class="cardAccent acc-orange"></div></div>
+    <div class="card"><div class="cardIcon">✅</div><div class="cardVal">${selesai}</div><div class="cardLabel">Selesai</div><div class="cardAccent acc-green"></div></div>
+    <div class="card"><div class="cardIcon">⏱️</div><div class="cardVal" style="font-size:1.1rem">${fmtDur(totalSec)}</div><div class="cardLabel">Waktu Kerja Hari Ini</div><div class="cardAccent acc-blue"></div></div>
+  </div>
+  <div class="section">
+    <div class="secHead"><h4>🕐 Absensi Hari Ini — ${fmtDateL(today)}</h4></div>
+    <div class="abToday">${abHtml||'<span style="color:var(--sub)">Belum ada absensi</span>'}</div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;position:relative;z-index:1">
+    <div class="section">
+      <div class="secHead"><h4>🔴 Urgent</h4></div>
+      <table><thead><tr><th>Pekerjaan</th><th>Klien</th><th>Status</th></tr></thead><tbody>
+      ${urgList.length?urgList.map(p=>{const k=CACHE.klien.find(k=>k.id===p.klien_id);return`<tr style="cursor:pointer" onclick="openDetail('${p.id}')"><td><b>${p.judul}</b></td><td>${k?k.nama:'-'}</td><td><span class="badge ${badgeSt(p.status)}">${p.status}</span></td></tr>`;}).join(''):'<tr><td colspan="3" style="color:var(--sub);text-align:center">Tidak ada</td></tr>'}
+      </tbody></table>
+    </div>
+    <div class="section">
+      <div class="secHead"><h4>⏰ Deadline 7 Hari</h4></div>
+      <table><thead><tr><th>Pekerjaan</th><th>Deadline</th><th>Status</th></tr></thead><tbody>
+      ${soonList.length?soonList.map(p=>`<tr style="cursor:pointer" onclick="openDetail('${p.id}')"><td><b>${p.judul}</b></td><td>${fmtDate(p.deadline)}</td><td><span class="badge ${badgeSt(p.status)}">${p.status}</span></td></tr>`).join(''):'<tr><td colspan="3" style="color:var(--sub);text-align:center">Tidak ada</td></tr>'}
+      </tbody></table>
+    </div>
+  </div>`;
+}
+
+// ===== KLIEN (Admin only) =====
+function renderKlien(q='',pg=1,rpp=rowsPerPageKlien){
+  if(!isAdmin()) return`<div class="accessDenied"><div class="icon">⛔</div><p>Halaman ini hanya dapat diakses oleh <b>Admin</b>.</p></div>`;
+  let list=CACHE.klien.filter(k=>!q||(k.nama+' '+(k.npwp||'')+(k.nama_kontak||'')).toLowerCase().includes(q.toLowerCase()));
+  const total=list.length;
+  const totalPages=Math.ceil(total/rpp)||1;
+  pg=Math.min(pg,totalPages);
+  const paged=list.slice((pg-1)*rpp, pg*rpp);
+  const rows=paged.length?paged.map(k=>{
+    const jml=CACHE.pekerjaan.filter(p=>p.klien_id===k.id&&!p.parent_id).length;
+    const done=CACHE.pekerjaan.filter(p=>p.klien_id===k.id&&p.status==='Selesai'&&!p.parent_id).length;
+    const pct=jml?Math.round(done/jml*100):0;
+    return`<tr>
+      <td><b>${k.nama}</b></td>
+      <td>${k.npwp||'-'}</td>
+      <td>${k.bidang||'-'}</td>
+      <td>${k.nama_kontak||'-'}</td>
+      <td>${k.kontak||'-'}</td>
+      <td>${k.email||'-'}</td>
+      <td>${jml}<span style="color:var(--sub);font-size:.74rem"> (${done} selesai)</span>
+        <div class="progressBar"><div class="progressFill" style="width:${pct}%"></div></div></td>
+      <td>
+        <button class="btnSm btnEdit" onclick="modalKlien('${k.id}')">✏️</button>
+        <button class="btnSm btnDanger" onclick="delKlien('${k.id}')">🗑️</button>
+      </td></tr>`;
+  }).join(''):`<tr><td colspan="8" style="color:var(--sub);text-align:center;padding:20px">Belum ada klien</td></tr>`;
+  return`<div class="section" style="position:relative;z-index:1">
+    <div class="secHead"><h4>Daftar Klien</h4>
+    <div class="flex">
+      <input style="padding:7px 10px;border:1.5px solid var(--gray2);border-radius:7px;font-size:.8rem;width:200px" placeholder="Cari nama / NPWP / kontak..." id="srchKlien" value="${q}" oninput="pageKlien=1;document.getElementById('pageContent').innerHTML=renderKlien(this.value,1,rowsPerPageKlien)"/>
+      <button class="btnPrimary" onclick="modalKlien()">+ Tambah Klien</button>
+    </div></div>
+    <div style="overflow-x:auto"><table><thead><tr><th>Nama Perusahaan</th><th>NPWP</th><th>Bidang Usaha</th><th>PIC</th><th>No. Kontak</th><th>Email</th><th>Progres</th><th>Aksi</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div class="pagination">
+      <span class="rowsLabel">Baris per halaman:</span>
+      <select onchange="rowsPerPageKlien=+this.value;pageKlien=1;showPage('klien')">
+        <option value="10" ${rpp===10?'selected':''}>10</option>
+        <option value="15" ${rpp===15?'selected':''}>15</option>
+        <option value="20" ${rpp===20?'selected':''}>20</option>
+      </select>
+      <button class="btnSm btnGray" onclick="if(pageKlien>1){pageKlien--;showPage('klien')}" ${pg<=1?'disabled':''}>‹</button>
+      <span>Hal ${pg} / ${totalPages} (${total} data)</span>
+      <button class="btnSm btnGray" onclick="if(pageKlien<${totalPages}){pageKlien++;showPage('klien')}" ${pg>=totalPages?'disabled':''}>›</button>
+    </div>
+  </div>`;
+}
+
+function modalKlien(id=''){
+  if(!isAdmin()){ toast('⛔ Hanya Admin yang dapat mengelola klien'); return; }
+  const k=id?CACHE.klien.find(x=>x.id===id):null;
+  document.getElementById('modalBox').innerHTML=`<h4>${k?'Edit':'Tambah'} Klien</h4>
+    <div class="formGrid">
+      <div class="formGroup full"><label>Nama Perusahaan *</label><input id="fkN" value="${k?k.nama:''}"/></div>
+      <div class="formGroup"><label>NPWP</label><input id="fkNPWP" placeholder="00.000.000.0-000.000" value="${k?k.npwp||'':''}"/></div>
+      <div class="formGroup"><label>Bidang Usaha</label><input id="fkB" value="${k?k.bidang||'':''}"/></div>
+      <div class="formGroup"><label>PIC</label><input id="fkNK" value="${k?k.nama_kontak||'':''}"/></div>
+      <div class="formGroup"><label>No. Kontak</label><input id="fkK" value="${k?k.kontak||'':''}"/></div>
+      <div class="formGroup full"><label>Email</label><input id="fkE" value="${k?k.email||'':''}"/></div>
+      <div class="formGroup full"><label>Catatan</label><textarea id="fkC">${k?k.catatan||'':''}</textarea></div>
+    </div>
+    <div class="flex mt10"><button class="btnPrimary" onclick="saveKlien('${id}')">💾 Simpan</button>
+    <button onclick="closeModal()" class="btnSm btnGray" style="padding:9px 16px;font-size:.84rem">Batal</button></div>`;
+  document.getElementById('modalWrap').classList.remove('hidden');
+}
+
+async function saveKlien(id){
+  if(!isAdmin()){ toast('⛔ Hanya Admin'); return; }
+  const nama=document.getElementById('fkN').value.trim();
+  if(!nama) return alert('Nama wajib!');
+  const data={nama, nama_kontak:document.getElementById('fkNK').value, npwp:document.getElementById('fkNPWP').value, bidang:document.getElementById('fkB').value, kontak:document.getElementById('fkK').value, email:document.getElementById('fkE').value, catatan:document.getElementById('fkC').value};
+  if(id) await sb.from('klien').update(data).eq('id',id);
+  else   await sb.from('klien').insert(data);
+  await loadAll(); closeModal(); showPage('klien'); toast('✅ Klien tersimpan!');
+}
+
+async function delKlien(id){
+  if(!isAdmin()){ toast('⛔ Hanya Admin'); return; }
+  if(!confirm('Hapus klien ini?')) return;
+  await sb.from('klien').delete().eq('id',id);
+  await loadAll(); showPage('klien'); toast('🗑️ Klien dihapus');
+}
+
+// ===== PEKERJAAN =====
+const KATEGORI=['Laporan Keuangan','SPT Tahunan','SPT Masa','Rekonsiliasi','Audit','Payroll','Pembukuan','Lainnya'];
+
+function renderPekerjaan(fK='',fS='',fP='',fU='',q='',pg=1,rpp=rowsPerPagePek){
+  let list=CACHE.pekerjaan.filter(p=>!p.parent_id);
+  if(fK) list=list.filter(p=>p.klien_id===fK);
+  if(fS) list=list.filter(p=>p.status===fS);
+  if(fP) list=list.filter(p=>p.prioritas===fP);
+  if(fU) list=list.filter(p=>p.user_id===fU||p.asisten_id===fU);
+  if(q)  list=list.filter(p=>p.judul.toLowerCase().includes(q.toLowerCase()));
+  list=[...list].sort((a,b)=>(a.prioritas==='Urgent'?0:1)-(b.prioritas==='Urgent'?0:1));
+  const total=list.length;
+  const totalPages=Math.ceil(total/rpp)||1;
+  pg=Math.min(pg,totalPages);
+  const klienOpts=CACHE.klien.map(k=>`<option value="${k.id}" ${fK===k.id?'selected':''}>${k.nama}</option>`).join('');
+  const userOpts=CACHE.users.map(u=>`<option value="${u.id}" ${fU===u.id?'selected':''}>${u.nama}</option>`).join('');
+  let viewContent='';
+  if(currentView==='list'){
+    const paged=list.slice((pg-1)*rpp,pg*rpp);
+    const rows=paged.length?paged.map(p=>{
+      const k=CACHE.klien.find(k=>k.id===p.klien_id);
+      const u=CACHE.users.find(u=>u.id===p.user_id);
+      const subs=CACHE.pekerjaan.filter(x=>x.parent_id===p.id);
+      const doneSub=subs.filter(x=>x.status==='Selesai').length;
+      const totalT=CACHE.timelogs.filter(t=>t.pek_id===p.id).reduce((s,t)=>s+(t.durasi||0),0);
+      const late=p.deadline&&p.deadline.split('T')[0]<todayStr()&&p.status!=='Selesai';
+      const canEdit=canEditPek(p);
+      const creator=CACHE.users.find(u=>u.id===p.created_by);
+      return`<tr style="cursor:pointer" onclick="openDetail('${p.id}')">
+        <td><b>${p.judul}</b>${late?'<br><span style="color:var(--red);font-size:.7rem">⚠️ Terlambat</span>':''}
+          ${subs.length?`<br><span style="font-size:.7rem;color:var(--sub)">${doneSub}/${subs.length} subtask</span>`:''}
+          ${!canEdit?'<span class="lockBadge">🔒</span>':''}</td>
+        <td>${k?k.nama:'-'}</td><td>${p.kategori||'-'}</td>
+        <td><span class="badge ${badgeSt(p.status)}">${p.status}</span></td>
+        <td><span class="badge ${p.prioritas==='Urgent'?'b-urgent':'b-normal'}">${p.prioritas}</span></td>
+        <td>${u?u.nama:'-'}</td><td>${fmtDate(p.tanggal)}</td><td>${fmtDate(p.deadline)}</td>
+        <td>${totalT?'⏱️ '+fmtDur(totalT):'-'}</td>
+        <td onclick="event.stopPropagation()">
+          ${canEdit?`<button class="btnSm btnEdit" onclick="modalPek('${p.id}')">✏️</button><button class="btnSm btnDanger" onclick="delPek('${p.id}')">🗑️</button>`:'<span style="font-size:.74rem;color:var(--sub)">🔒</span>'}
+        </td></tr>`;
+    }).join(''):`<tr><td colspan="10" style="color:var(--sub);text-align:center;padding:20px">Tidak ada data</td></tr>`;
+    const pagination=`<div class="pagination">
+      <span class="rowsLabel">Baris per halaman:</span>
+      <select onchange="rowsPerPagePek=+this.value;pagePek=1;showPage('pekerjaan')">
+        <option value="10" ${rpp===10?'selected':''}>10</option>
+        <option value="15" ${rpp===15?'selected':''}>15</option>
+        <option value="20" ${rpp===20?'selected':''}>20</option>
+      </select>
+      <button class="btnSm btnGray" onclick="if(pagePek>1){pagePek--;showPage('pekerjaan')}" ${pg<=1?'disabled':''}>‹</button>
+      <span>Hal ${pg} / ${totalPages} (${total} data)</span>
+      <button class="btnSm btnGray" onclick="if(pagePek<${totalPages}){pagePek++;showPage('pekerjaan')}" ${pg>=totalPages?'disabled':''}>›</button>
+    </div>`;
+    viewContent=`<div style="overflow-x:auto"><table><thead><tr><th>Pekerjaan</th><th>Klien</th><th>Kategori</th><th>Status</th><th>Prioritas</th><th>Dikerjakan</th><th>Tgl</th><th>Deadline</th><th>Waktu</th><th>Aksi</th></tr></thead><tbody>${rows}</tbody></table></div>${pagination}`;
+  } else if(currentView==='board'){
+    const cols=['Belum Dimulai','Dalam Proses','Selesai'];
+    viewContent=`<div class="kanbanWrap">${cols.map(col=>{
+      const items=list.filter(p=>p.status===col);
+      return`<div class="kanbanCol" ondragover="event.preventDefault()" ondrop="dropKanban(event,'${col}')">
+        <h5>${col==='Belum Dimulai'?'📋':col==='Dalam Proses'?'🔄':'✅'} ${col} <span style="background:rgba(0,0,0,.08);border-radius:10px;padding:1px 7px;font-size:.74rem">${items.length}</span></h5>
+        ${items.map(p=>{const k=CACHE.klien.find(k=>k.id===p.klien_id);return`<div class="kanbanCard ${p.prioritas.toLowerCase()}" draggable="true" ondragstart="dragKanban(event,'${p.id}')" onclick="openDetail('${p.id}')">
+          <h6>${p.judul}${!canEditPek(p)?'<span class="lockBadge">🔒</span>':''}</h6><p>${k?k.nama:'-'}</p>
+          <div class="cardMeta"><span class="badge ${p.prioritas==='Urgent'?'b-urgent':'b-normal'}" style="font-size:.68rem">${p.prioritas}</span>
+          ${p.deadline?`<span style="font-size:.7rem;color:var(--sub)">${fmtDate(p.deadline)}</span>`:''}
+          </div></div>`;}).join('')}
+      </div>`;}).join('')}</div>`;
+  } else {
+    viewContent=renderCalendar(list);
+  }
+  return`<div class="section" style="position:relative;z-index:1">
+    <div class="secHead">
+      <h4>Log & Rencana Pekerjaan</h4>
+      <div class="flex">
+        <div class="viewToggle">
+          <button class="viewBtn ${currentView==='list'?'active':''}" onclick="setView('list')">☰ List</button>
+          <button class="viewBtn ${currentView==='board'?'active':''}" onclick="setView('board')">⊞ Board</button>
+          <button class="viewBtn ${currentView==='calendar'?'active':''}" onclick="setView('calendar')">📅 Kalender</button>
+        </div>
+        <button class="btnPrimary" onclick="modalPek()">+ Tambah</button>
+      </div>
+    </div>
+    <div class="filterBar">
+      <input style="padding:6px 9px;border:1.5px solid var(--gray2);border-radius:6px;font-size:.79rem;width:180px" placeholder="Cari..." id="srchPek" value="${q}" oninput="pagePek=1;applyFlt()"/>
+      <select id="fltK" onchange="pagePek=1;applyFlt()"><option value="">Semua Klien</option>${klienOpts}</select>
+      <select id="fltS" onchange="pagePek=1;applyFlt()"><option value="">Semua Status</option>
+        <option ${fS==='Belum Dimulai'?'selected':''}>Belum Dimulai</option>
+        <option ${fS==='Dalam Proses'?'selected':''}>Dalam Proses</option>
+        <option ${fS==='Selesai'?'selected':''}>Selesai</option></select>
+      <select id="fltP" onchange="pagePek=1;applyFlt()"><option value="">Semua Prioritas</option>
+        <option ${fP==='Normal'?'selected':''}>Normal</option>
+        <option ${fP==='Urgent'?'selected':''}>Urgent</option></select>
+      <select id="fltU" onchange="pagePek=1;applyFlt()"><option value="">Semua User</option>${userOpts}</select>
+    </div>
+    ${viewContent}
+  </div>`;
+}
+
+function setView(v){currentView=v;showPage('pekerjaan');}
+function applyFlt(){
+  const fK=document.getElementById('fltK')?.value||'';
+  const fS=document.getElementById('fltS')?.value||'';
+  const fP=document.getElementById('fltP')?.value||'';
+  const fU=document.getElementById('fltU')?.value||'';
+  const q=document.getElementById('srchPek')?.value||'';
+  document.getElementById('pageContent').innerHTML=renderPekerjaan(fK,fS,fP,fU,q,pagePek,rowsPerPagePek);
+}
+function dragKanban(e,id){dragId=id;e.dataTransfer.effectAllowed='move';}
+async function dropKanban(e,status){
+  e.preventDefault(); if(!dragId)return;
+  const p=CACHE.pekerjaan.find(x=>x.id===dragId);
+  if(p&&canEditPek(p)){ await sb.from('pekerjaan').update({status}).eq('id',dragId); await loadAll(); showPage('pekerjaan'); }
+  else toast('⛔ Anda tidak bisa mengubah pekerjaan ini');
+  dragId=null;
+}
+function renderCalendar(list){
+  const now=new Date(); const y=now.getFullYear(),m=now.getMonth();
+  const days=['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+  const months=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  let cells='';
+  for(let i=0;i<new Date(y,m,1).getDay();i++) cells+=`<div class="calCell" style="opacity:.3"></div>`;
+  for(let d=1;d<=new Date(y,m+1,0).getDate();d++){
+    const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const evs=list.filter(p=>(p.deadline&&p.deadline.startsWith(ds))||(p.tanggal&&p.tanggal.startsWith(ds)));
+    cells+=`<div class="calCell${ds===todayStr()?' today':''}"><div class="calDate">${d}</div>${evs.map(p=>`<div class="calEvent${p.prioritas==='Urgent'?' urgent':''}" onclick="openDetail('${p.id}')">${p.judul}</div>`).join('')}</div>`;
+  }
+  return`<div class="calWrap"><div style="font-weight:700;color:var(--text);margin-bottom:10px">${months[m]} ${y}</div>
+    <div class="calGrid">${days.map(d=>`<div class="calHead">${d}</div>`).join('')}${cells}</div></div>`;
+}
+
+function modalPek(id=''){
+  const p=id?CACHE.pekerjaan.find(x=>x.id===id):null;
+  if(p&&!canEditPek(p)){ toast('⛔ Anda tidak memiliki akses untuk mengubah pekerjaan ini'); return; }
+  const klienOpts=CACHE.klien.map(k=>`<option value="${k.id}" ${p&&p.klien_id===k.id?'selected':''}>${k.nama}</option>`).join('');
+  const userOpts=CACHE.users.map(u=>`<option value="${u.id}" ${p&&p.user_id===u.id?'selected':''}>${u.nama}</option>`).join('');
+  const asOpts='<option value="">-- Tidak Ada --</option>'+CACHE.users.map(u=>`<option value="${u.id}" ${p&&p.asisten_id===u.id?'selected':''}>${u.nama}</option>`).join('');
+  const katOpts=KATEGORI.map(k=>`<option ${p&&p.kategori===k?'selected':''}>${k}</option>`).join('');
+  const tgl=p&&p.tanggal?p.tanggal.split('T')[0]:todayStr();
+  const dl=p&&p.deadline?p.deadline.split('T')[0]:'';
+  document.getElementById('modalBox').innerHTML=`<h4>${p?'Edit':'Tambah'} Pekerjaan</h4>
+    <div class="formGrid">
+      <div class="formGroup full"><label>Judul *</label><input id="fpJ" value="${p?p.judul:''}"/></div>
+      <div class="formGroup"><label>Klien *</label><select id="fpK"><option value="">-- Pilih --</option>${klienOpts}</select></div>
+      <div class="formGroup"><label>Kategori</label><select id="fpKat">${katOpts}</select></div>
+      <div class="formGroup"><label>Dikerjakan oleh</label><select id="fpU"><option value="">--</option>${userOpts}</select></div>
+      <div class="formGroup"><label>Asisten</label><select id="fpA">${asOpts}</select></div>
+      <div class="formGroup"><label>Status</label><select id="fpS">
+        <option ${!p||p.status==='Belum Dimulai'?'selected':''}>Belum Dimulai</option>
+        <option ${p&&p.status==='Dalam Proses'?'selected':''}>Dalam Proses</option>
+        <option ${p&&p.status==='Selesai'?'selected':''}>Selesai</option></select></div>
+      <div class="formGroup"><label>Prioritas</label><select id="fpP">
+        <option ${!p||p.prioritas==='Normal'?'selected':''}>Normal</option>
+        <option ${p&&p.prioritas==='Urgent'?'selected':''}>Urgent</option></select></div>
+      <div class="formGroup"><label>Tanggal</label><input type="date" id="fpT" value="${tgl}"/></div>
+      <div class="formGroup"><label>Deadline</label><input type="date" id="fpD" value="${dl}"/></div>
+      <div class="formGroup full"><label>Catatan</label><textarea id="fpC">${p?p.catatan||'':''}</textarea></div>
+    </div>
+    <div class="flex mt10"><button class="btnPrimary" onclick="savePek('${id}')">💾 Simpan</button>
+    <button onclick="closeModal()" class="btnSm btnGray" style="padding:9px 16px;font-size:.84rem">Batal</button></div>`;
+  document.getElementById('modalWrap').classList.remove('hidden');
+}
+
+async function savePek(id){
+  const p=id?CACHE.pekerjaan.find(x=>x.id===id):null;
+  if(p&&!canEditPek(p)){ toast('⛔ Akses ditolak'); return; }
+  const judul=document.getElementById('fpJ').value.trim();
+  const klienId=document.getElementById('fpK').value;
+  if(!judul) return alert('Judul wajib!');
+  if(!klienId) return alert('Pilih klien!');
+  const data={judul, klien_id:klienId, kategori:document.getElementById('fpKat').value,
+    user_id:document.getElementById('fpU').value||null, asisten_id:document.getElementById('fpA').value||null,
+    status:document.getElementById('fpS').value, prioritas:document.getElementById('fpP').value,
+    tanggal:document.getElementById('fpT').value||null, deadline:document.getElementById('fpD').value||null,
+    catatan:document.getElementById('fpC').value};
+  if(!id) data.created_by=currentUser.id;
+  if(id) await sb.from('pekerjaan').update(data).eq('id',id);
+  else   await sb.from('pekerjaan').insert(data);
+  await loadAll(); closeModal(); showPage('pekerjaan'); toast('✅ Pekerjaan tersimpan!');
+}
+
+async function delPek(id){
+  const p=CACHE.pekerjaan.find(x=>x.id===id);
+  if(p&&!canEditPek(p)){ toast('⛔ Anda tidak memiliki akses untuk menghapus pekerjaan ini'); return; }
+  if(!confirm('Hapus pekerjaan ini?')) return;
+  await sb.from('pekerjaan').delete().eq('id',id);
+  await loadAll(); showPage('pekerjaan'); toast('🗑️ Pekerjaan dihapus');
+}
+
+// ===== DETAIL PANEL =====
+async function openDetail(pId){
+  const p=CACHE.pekerjaan.find(x=>x.id===pId); if(!p)return;
+  const k=CACHE.klien.find(k=>k.id===p.klien_id);
+  const u=CACHE.users.find(u=>u.id===p.user_id);
+  const a=p.asisten_id?CACHE.users.find(u=>u.id===p.asisten_id):null;
+  const creator=CACHE.users.find(u=>u.id===p.created_by);
+  const subs=CACHE.pekerjaan.filter(x=>x.parent_id===pId);
+  const comments=CACHE.comments.filter(c=>c.pek_id===pId);
+  const timelogs=CACHE.timelogs.filter(t=>t.pek_id===pId);
+  const totalT=timelogs.reduce((s,t)=>s+(t.durasi||0),0);
+  const late=p.deadline&&p.deadline.split('T')[0]<todayStr()&&p.status!=='Selesai';
+  const canEdit=canEditPek(p);
+  document.getElementById('detailTitle').textContent=p.judul;
+  document.getElementById('detailBody').innerHTML=`
+    <div class="detailSection">
+      <div class="flex" style="flex-wrap:wrap;gap:6px;margin-bottom:10px">
+        <span class="badge ${badgeSt(p.status)}">${p.status}</span>
+        <span class="badge ${p.prioritas==='Urgent'?'b-urgent':'b-normal'}">${p.prioritas}</span>
+        ${p.kategori?`<span class="tag">${p.kategori}</span>`:''}
+        ${late?'<span class="badge b-urgent">⚠️ Terlambat</span>':''}
+        ${!canEdit?'<span class="badge" style="background:#f1f5f9;color:var(--sub)">🔒 Terkunci</span>':''}
+      </div>
+      <table style="font-size:.8rem"><tbody>
+        <tr><td style="color:var(--sub);width:90px;padding:4px 0">Klien</td><td><b>${k?k.nama:'-'}</b></td></tr>
+        <tr><td style="color:var(--sub);padding:4px 0">Penanggung jawab</td><td>${u?u.nama:'-'}</td></tr>
+        ${a?`<tr><td style="color:var(--sub);padding:4px 0">Asisten</td><td>${a.nama}</td></tr>`:''}
+        <tr><td style="color:var(--sub);padding:4px 0">Dibuat oleh</td><td>${creator?creator.nama:'-'}</td></tr>
+        <tr><td style="color:var(--sub);padding:4px 0">Tanggal</td><td>${fmtDateL(p.tanggal)}</td></tr>
+        <tr><td style="color:var(--sub);padding:4px 0">Deadline</td><td>${p.deadline?fmtDateL(p.deadline):'-'}</td></tr>
+        <tr><td style="color:var(--sub);padding:4px 0">Total Waktu</td><td>⏱️ ${fmtDur(totalT)}</td></tr>
+      </tbody></table>
+      ${p.catatan?`<div style="margin-top:8px;padding:8px;background:var(--gray);border-radius:6px;font-size:.8rem">${p.catatan}</div>`:''}
+      ${canEdit?`<div class="flex mt10">
+        <button class="btnPrimary" style="font-size:.78rem;padding:7px 14px" onclick="modalPek('${pId}');closeDetail()">✏️ Edit</button>
+        <button class="btnSm btnGray" style="padding:7px 12px;font-size:.78rem" onclick="changeStatus('${pId}')">🔄 Ubah Status</button>
+      </div>`:'<p style="font-size:.78rem;color:var(--sub);margin-top:8px">🔒 Hanya pembuat atau Admin yang dapat mengubah pekerjaan ini.</p>'}
+    </div>
+    <div class="detailSection">
+      <h5>⏱️ Time Tracker</h5>
+      <div class="timerBar">
+        <div class="timerDisplay" id="timerDisp">00m 00s</div>
+        <button class="btnTimer btnStart" id="timerStartBtn" onclick="startTimer('${pId}')">▶ Mulai</button>
+        <button class="btnTimer btnStop hidden" id="timerStopBtn" onclick="stopTimer()">⏹ Stop</button>
+      </div>
+      <div style="font-size:.78rem;color:var(--sub)">${timelogs.map(t=>`<span style="margin-right:6px">${fmtDate(t.tanggal)} ${fmtDur(t.durasi)}</span>`).join('')||'Belum ada log waktu'}</div>
+    </div>
+    <div class="detailSection">
+      <h5>☑️ Subtasks (${subs.length})</h5>
+      <div class="subtaskList">
+        ${subs.map(st=>`<div class="subtaskItem">
+          <input type="checkbox" ${st.status==='Selesai'?'checked':''} onchange="toggleSubtask('${st.id}',this.checked,'${pId}')"/>
+          <span class="${st.status==='Selesai'?'done':''}">${st.judul}</span>
+          ${canEdit?`<button class="btnSm btnDanger" style="margin-left:auto;padding:2px 7px;font-size:.7rem" onclick="delSubtask('${st.id}','${pId}')">✕</button>`:''}
+        </div>`).join('')}
+      </div>
+      <div class="flex mt10">
+        <input id="newSub" placeholder="Tambah subtask..." style="flex:1;padding:6px 9px;border:1.5px solid var(--gray2);border-radius:6px;font-size:.8rem" onkeydown="if(event.key==='Enter')addSubtask('${pId}')"/>
+        <button class="btnPrimary" style="font-size:.78rem;padding:6px 12px" onclick="addSubtask('${pId}')">+</button>
+      </div>
+    </div>
+    <div class="detailSection">
+      <h5>💬 Komentar (${comments.length})</h5>
+      <div class="commentList">
+        ${comments.map(c=>{const cu=CACHE.users.find(u=>u.id===c.user_id);return`<div class="commentItem">
+          <div class="commentAvatar">${cu?cu.nama.charAt(0).toUpperCase():'?'}</div>
+          <div class="commentBody"><div class="cmeta">${cu?cu.nama:'-'} · ${c.waktu}</div><p>${c.teks}</p></div>
+        </div>`;}).join('')}
+      </div>
+      <div class="commentInput">
+        <input id="newCmt" placeholder="Tulis komentar..." onkeydown="if(event.key==='Enter')addComment('${pId}')"/>
+        <button class="btnPrimary" style="font-size:.8rem;padding:7px 12px" onclick="addComment('${pId}')">Kirim</button>
+      </div>
+    </div>`;
+  document.getElementById('detailPanel').classList.add('open');
+  if(timerPekId===pId){
+    document.getElementById('timerStartBtn').classList.add('hidden');
+    document.getElementById('timerStopBtn').classList.remove('hidden');
+  }
+}
+function closeDetail(){document.getElementById('detailPanel').classList.remove('open');}
+
+async function changeStatus(pId){
+  const p=CACHE.pekerjaan.find(x=>x.id===pId);
+  if(!canEditPek(p)){ toast('⛔ Akses ditolak'); return; }
+  const s=['Belum Dimulai','Dalam Proses','Selesai'];
+  await sb.from('pekerjaan').update({status:s[(s.indexOf(p.status)+1)%3]}).eq('id',pId);
+  await loadAll(); openDetail(pId); if(currentPage==='pekerjaan')showPage('pekerjaan');
+}
+async function addSubtask(pId){
+  const inp=document.getElementById('newSub');
+  const judul=inp.value.trim(); if(!judul)return;
+  const par=CACHE.pekerjaan.find(x=>x.id===pId);
+  await sb.from('pekerjaan').insert({judul,parent_id:pId,klien_id:par.klien_id,status:'Belum Dimulai',prioritas:'Normal',tanggal:todayStr(),created_by:currentUser.id});
+  await loadAll(); inp.value=''; openDetail(pId);
+}
+async function toggleSubtask(id,done,pId){
+  await sb.from('pekerjaan').update({status:done?'Selesai':'Belum Dimulai'}).eq('id',id);
+  await loadAll(); openDetail(pId);
+}
+async function delSubtask(id,pId){
+  await sb.from('pekerjaan').delete().eq('id',id);
+  await loadAll(); openDetail(pId);
+}
+async function addComment(pId){
+  const inp=document.getElementById('newCmt');
+  const teks=inp.value.trim(); if(!teks)return;
+  await sb.from('comments').insert({pek_id:pId,user_id:currentUser.id,teks,waktu:fmtDateL(todayStr())+' '+nowTime()});
+  await loadAll(); inp.value=''; openDetail(pId);
+}
+
+// TIME TRACKER
+function startTimer(pId){
+  if(timerInterval)stopTimer();
+  timerPekId=pId; timerStart=Date.now(); timerElapsed=0;
+  document.getElementById('timerStartBtn').classList.add('hidden');
+  document.getElementById('timerStopBtn').classList.remove('hidden');
+  timerInterval=setInterval(()=>{
+    timerElapsed=Math.floor((Date.now()-timerStart)/1000);
+    const m=Math.floor(timerElapsed/60),s=timerElapsed%60;
+    const el=document.getElementById('timerDisp');
+    if(el)el.textContent=`${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
+  },1000);
+}
+async function stopTimer(){
+  if(!timerInterval)return;
+  clearInterval(timerInterval); timerInterval=null;
+  if(timerElapsed>0&&timerPekId){
+    await sb.from('timelogs').insert({pek_id:timerPekId,user_id:currentUser?currentUser.id:null,durasi:timerElapsed,tanggal:todayStr()});
+    await loadAll(); toast('⏱️ Waktu tersimpan: '+fmtDur(timerElapsed));
+  }
+  timerElapsed=0; timerPekId=null;
+}
+
+// ===== DOCS =====
+let currentDocId=null;
+function renderDocs(){
+  return`<div style="position:relative;z-index:1">
+    <div class="section">
+      <div class="secHead"><h4>📝 Dokumen & Catatan</h4><button class="btnPrimary" onclick="newDoc()">+ Baru</button></div>
+      <div class="docList" id="docListEl">
+        ${CACHE.docs.length?CACHE.docs.map(d=>`<div class="docCard" onclick="openDoc('${d.id}')">
+          <div class="docIcon">📄</div><h6>${d.judul||'Tanpa Judul'}</h6>
+          <p>${fmtDateL(d.updated_at)}</p>
+          ${d.klien_id?`<p style="margin-top:3px;color:var(--blue);font-size:.72rem">${(CACHE.klien.find(k=>k.id===d.klien_id)||{}).nama||''}</p>`:''}
+          <button class="btnSm btnDanger" style="margin-top:8px" onclick="event.stopPropagation();delDoc('${d.id}')">🗑️ Hapus</button>
+        </div>`).join(''):'<p style="color:var(--sub)">Belum ada dokumen</p>'}
+      </div>
+    </div>
+    <div class="docEditor hidden" id="docEditorEl">
+      <div class="secHead">
+        <div class="flex">
+          <button class="btnSm btnGray" onclick="backDocs()">← Kembali</button>
+          <select id="docKlien" style="padding:6px 9px;border:1.5px solid var(--gray2);border-radius:6px;font-size:.8rem">
+            <option value="">-- Tanpa Klien --</option>
+            ${CACHE.klien.map(k=>`<option value="${k.id}">${k.nama}</option>`).join('')}
+          </select>
+        </div>
+        <button class="btnPrimary" onclick="saveDoc()">💾 Simpan</button>
+      </div>
+      <input class="docTitle" id="docTitleEl" placeholder="Judul dokumen..."/>
+      <textarea class="docBody" id="docBodyEl" placeholder="Mulai menulis..."></textarea>
+    </div>
+  </div>`;
+}
+function newDoc(){currentDocId=null;showDocEditor({judul:'',body:'',klien_id:''});}
+function openDoc(id){const d=CACHE.docs.find(x=>x.id===id);if(!d)return;currentDocId=id;showDocEditor(d);}
+function showDocEditor(d){
+  document.getElementById('docListEl').classList.add('hidden');
+  document.getElementById('docEditorEl').classList.remove('hidden');
+  document.getElementById('docTitleEl').value=d.judul||'';
+  document.getElementById('docBodyEl').value=d.body||'';
+  setTimeout(()=>{const s=document.getElementById('docKlien');if(s)s.value=d.klien_id||'';},50);
+}
+function backDocs(){document.getElementById('docListEl').classList.remove('hidden');document.getElementById('docEditorEl').classList.add('hidden');currentDocId=null;}
+async function saveDoc(){
+  const judul=document.getElementById('docTitleEl').value;
+  const body=document.getElementById('docBodyEl').value;
+  const klienId=document.getElementById('docKlien').value||null;
+  const updated_at=todayStr();
+  if(currentDocId) await sb.from('docs').update({judul,body,klien_id:klienId,updated_at}).eq('id',currentDocId);
+  else{ const {data}=await sb.from('docs').insert({judul,body,klien_id:klienId,updated_at}).select(); if(data)currentDocId=data[0].id; }
+  await loadAll(); toast('✅ Dokumen tersimpan!');
+}
+async function delDoc(id){
+  if(!confirm('Hapus dokumen?'))return;
+  await sb.from('docs').delete().eq('id',id);
+  await loadAll(); showPage('docs'); toast('🗑️ Dokumen dihapus');
+}
+
+// ===== ABSENSI =====
+function renderAbsensi(){
+  const byDate={};
+  CACHE.absensi.forEach(a=>{if(!byDate[a.tanggal])byDate[a.tanggal]=[];byDate[a.tanggal].push(a);});
+  const dates=Object.keys(byDate).sort((a,b)=>b.localeCompare(a));
+  const html=dates.map(d=>{
+    const rows=byDate[d].map(a=>`<tr><td>${a.nama}</td><td>${a.jam}</td><td><span class="badge b-green">Masuk</span></td></tr>`).join('');
+    return`<div style="margin-bottom:14px"><div style="font-weight:700;color:var(--text);margin-bottom:6px;font-size:.85rem">📅 ${fmtDateL(d)}</div>
+      <table><thead><tr><th>Nama</th><th>Jam</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }).join('')||'<p style="color:var(--sub);text-align:center">Belum ada data</p>';
+  return`<div class="section" style="position:relative;z-index:1">
+    <div class="secHead"><h4>Riwayat Absensi</h4>
+    <button class="btnPrimary" onclick="modalAbsensi()">+ Manual</button></div>${html}</div>`;
+}
+function modalAbsensi(){
+  const uOpts=CACHE.users.map(u=>`<option value="${u.id}">${u.nama}</option>`).join('');
+  document.getElementById('modalBox').innerHTML=`<h4>Absensi Manual</h4>
+    <div class="formGrid">
+      <div class="formGroup full"><label>User</label><select id="abU">${uOpts}</select></div>
+      <div class="formGroup"><label>Tanggal</label><input type="date" id="abT" value="${todayStr()}"/></div>
+      <div class="formGroup"><label>Jam</label><input type="time" id="abJ" value="${nowTime()}"/></div>
+    </div>
+    <div class="flex mt10"><button class="btnPrimary" onclick="saveAbsensi()">💾 Simpan</button>
+    <button onclick="closeModal()" class="btnSm btnGray" style="padding:9px 16px;font-size:.84rem">Batal</button></div>`;
+  document.getElementById('modalWrap').classList.remove('hidden');
+}
+async function saveAbsensi(){
+  const uId=document.getElementById('abU').value;
+  const u=CACHE.users.find(x=>x.id===uId);
+  await sb.from('absensi').insert({user_id:uId,nama:u.nama,tanggal:document.getElementById('abT').value,jam:document.getElementById('abJ').value,tipe:'Manual'});
+  await loadAll(); closeModal(); showPage('absensi'); toast('✅ Absensi tersimpan!');
+}
+
+// ===== USERS =====
+function renderUsers(){
+  const rows=CACHE.users.map(u=>{
+    const jml=CACHE.pekerjaan.filter(p=>p.user_id===u.id||p.asisten_id===u.id).length;
+    const totalT=CACHE.timelogs.filter(t=>t.user_id===u.id).reduce((s,t)=>s+(t.durasi||0),0);
+    return`<tr><td><b>${u.nama}</b></td><td>${u.role==='admin'?'Admin / Akuntan':'Asisten'}</td><td>${jml}</td><td>${fmtDur(totalT)}</td>
+      <td>
+        <button class="btnSm btnEdit" onclick="modalUser('${u.id}')">✏️</button>
+        ${CACHE.users.length>1?`<button class="btnSm btnDanger" onclick="delUser('${u.id}')">🗑️</button>`:''}
+      </td></tr>`;
+  }).join('');
+  const addBtn=isAdmin()?`<button class="btnPrimary" onclick="modalUser()">+ Tambah User</button>`:`<span style="font-size:.8rem;color:var(--sub)">🔒 Hanya Admin yang dapat menambah user</span>`;
+  return`<div class="section" style="position:relative;z-index:1">
+    <div class="secHead"><h4>Daftar User</h4>${addBtn}</div>
+    <table><thead><tr><th>Nama</th><th>Role</th><th>Pekerjaan</th><th>Total Waktu</th><th>Aksi</th></tr></thead><tbody>${rows}</tbody></table>
+  </div>`;
+}
+function modalUser(id=''){
+  if(!isAdmin()&&!id){ toast('⛔ Hanya Admin yang dapat menambah user baru'); return; }
+  const u=id?CACHE.users.find(x=>x.id===id):null;
+  document.getElementById('modalBox').innerHTML=`<h4>${u?'Edit':'Tambah'} User</h4>
+    <div class="formGrid">
+      <div class="formGroup full"><label>Nama *</label><input id="fuN" value="${u?u.nama:''}"/></div>
+      <div class="formGroup"><label>Role</label><select id="fuR" ${!isAdmin()?'disabled':''}>
+        <option value="admin" ${u&&u.role==='admin'?'selected':''}>Admin / Akuntan</option>
+        <option value="asisten" ${!u||u.role==='asisten'?'selected':''}>Asisten</option></select></div>
+      <div class="formGroup"><label>PIN (opsional)</label><input type="password" id="fuP" placeholder="Kosongkan = tanpa PIN"/></div>
+    </div>
+    <div class="flex mt10"><button class="btnPrimary" onclick="saveUser('${id}')">💾 Simpan</button>
+    <button onclick="closeModal()" class="btnSm btnGray" style="padding:9px 16px;font-size:.84rem">Batal</button></div>`;
+  document.getElementById('modalWrap').classList.remove('hidden');
+}
+async function saveUser(id){
+  if(!isAdmin()&&!id){ toast('⛔ Hanya Admin'); return; }
+  const nama=document.getElementById('fuN').value.trim(); if(!nama)return alert('Nama wajib!');
+  const pin=document.getElementById('fuP').value;
+  const role=isAdmin()?document.getElementById('fuR').value:'asisten';
+  const data={nama,role};
+  if(pin)data.pin=pin;
+  if(id) await sb.from('users').update(data).eq('id',id);
+  else   await sb.from('users').insert(data);
+  await loadAll(); closeModal(); showPage('users'); toast('✅ User tersimpan!');
+}
+async function delUser(id){
+  if(!isAdmin()){ toast('⛔ Hanya Admin'); return; }
+  if(!confirm('Hapus user?'))return;
+  await sb.from('users').delete().eq('id',id);
+  await loadAll(); showPage('users'); toast('🗑️ User dihapus');
+}
+// ===== MANUAL =====
+function renderManual(){
+  return`<div style="position:relative;z-index:1">
+  <div class="section">
+    <div class="secHead"><h4>📖 Manual Pengguna SiKerja Pro</h4></div>
+    <iframe src="manual.html" style="width:100%;height:80vh;border:none;border-radius:8px"></iframe>
+  </div>
+  </div>`;
+}
+// ===== NOTIFIKASI =====
+function getNotifs(){
+  const today=todayStr(); const soon=new Date(); soon.setDate(soon.getDate()+3);
+  const notifs=[];
+  CACHE.pekerjaan.filter(p=>!p.parent_id).forEach(p=>{
+    if(p.status==='Selesai')return;
+    const dl=p.deadline?p.deadline.split('T')[0]:'';
+    if(dl&&dl<today) notifs.push({title:'⚠️ Melewati Deadline',sub:`${p.judul} — ${fmtDate(dl)}`,pId:p.id});
+    else if(dl&&new Date(dl)<=soon) notifs.push({title:'⏰ Deadline Mendekat',sub:`${p.judul} — ${fmtDate(dl)}`,pId:p.id});
+    if(p.prioritas==='Urgent') notifs.push({title:'🔴 Urgent',sub:p.judul,pId:p.id});
+  });
+  return notifs;
+}
+function renderNotifs(){
+  const notifs=getNotifs();
+  document.getElementById('notifDot').style.display=notifs.length?'inline-block':'none';
+  document.getElementById('notifList').innerHTML=notifs.length
+    ?notifs.slice(0,8).map(n=>`<div class="notifItem" onclick="openDetail('${n.pId}');closeNotif()"><div class="ni-title">${n.title}</div><div class="ni-sub">${n.sub}</div></div>`).join('')
+    :'<div style="padding:14px 16px;color:var(--sub);font-size:.82rem">Tidak ada notifikasi 🎉</div>';
+}
+function toggleNotif(){renderNotifs();document.getElementById('notifList').classList.toggle('open');}
+function closeNotif(){document.getElementById('notifList').classList.remove('open');}
+document.addEventListener('click',e=>{const nb=document.getElementById('notifBtn');if(nb&&!nb.contains(e.target))closeNotif();});
+
+function closeModal(){document.getElementById('modalWrap').classList.add('hidden');}
+document.getElementById('modalWrap').addEventListener('click',function(e){if(e.target===this)closeModal();});
+
+(async()=>{ await initLogin(); })();
+</script>
+</body>
+</html>
