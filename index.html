@@ -475,10 +475,17 @@ async function saveKlien(id){
 async function delKlien(id){
   if(!isAdmin()){ toast('⛔ Hanya Admin'); return; }
   if(!confirm('Hapus klien ini?')) return;
+  const halamanSekarang = pageKlien;
+  alert('Halaman sebelum hapus: ' + halamanSekarang);
   await sb.from('klien').delete().eq('id',id);
-  await loadAll(); showPage('klien'); toast('🗑️ Klien dihapus');
+  await loadAll();
+  const totalPages=Math.ceil(CACHE.klien.length/rowsPerPageKlien)||1;
+  pageKlien = halamanSekarang > totalPages ? totalPages : halamanSekarang;
+  alert('Halaman setelah hapus: ' + pageKlien + ' dari total: ' + totalPages);
+  const q=document.getElementById('srchKlien')?.value||'';
+  document.getElementById('pageContent').innerHTML=renderKlien(q,pageKlien,rowsPerPageKlien);
+  toast('🗑️ Klien dihapus');
 }
-
 // ===== PEKERJAAN =====
 const KATEGORI=['Laporan Keuangan','SPT Tahunan','SPT Masa','Rekonsiliasi','Audit','Payroll','Pembukuan','Lainnya'];
 
@@ -693,8 +700,21 @@ async function delPek(id){
   const p=CACHE.pekerjaan.find(x=>x.id===id);
   if(p&&!canEditPek(p)){ toast('⛔ Anda tidak memiliki akses untuk menghapus pekerjaan ini'); return; }
   if(!confirm('Hapus pekerjaan ini?')) return;
+  const halamanSekarang = pagePek;
+  alert('Halaman sebelum hapus: ' + halamanSekarang);
   await sb.from('pekerjaan').delete().eq('id',id);
-  await loadAll(); showPage('pekerjaan'); toast('🗑️ Pekerjaan dihapus');
+  await loadAll();
+  const totalPek=CACHE.pekerjaan.filter(x=>!x.parent_id).length;
+  const totalPages=Math.ceil(totalPek/rowsPerPagePek)||1;
+  pagePek = halamanSekarang > totalPages ? totalPages : halamanSekarang;
+  alert('Halaman setelah hapus: ' + pagePek + ' dari total: ' + totalPages);
+  const fK=document.getElementById('fltK')?.value||'';
+  const fS=document.getElementById('fltS')?.value||'';
+  const fP=document.getElementById('fltP')?.value||'';
+  const fU=document.getElementById('fltU')?.value||'';
+  const q=document.getElementById('srchPek')?.value||'';
+  document.getElementById('pageContent').innerHTML=renderPekerjaan(fK,fS,fP,fU,q,pagePek,rowsPerPagePek);
+  toast('🗑️ Pekerjaan dihapus');
 }
 
 // ===== DETAIL PANEL =====
@@ -1249,10 +1269,10 @@ function newDocFromPek(pId){
   },100);
 }
 function renderKlienPage(){
+  console.log('renderKlienPage dipanggil, pageKlien=', pageKlien);
   const q=document.getElementById('srchKlien')?.value||'';
   document.getElementById('pageContent').innerHTML=renderKlien(q,pageKlien,rowsPerPageKlien);
 }
-
 function renderPekerjaanPage(){
   const fK=document.getElementById('fltK')?.value||'';
   const fS=document.getElementById('fltS')?.value||'';
