@@ -432,14 +432,14 @@ function renderKlien(q='',pg=1,rpp=rowsPerPageKlien){
     <div style="overflow-x:auto"><table><thead><tr><th>Nama Perusahaan</th><th>NPWP</th><th>Bidang Usaha</th><th>PIC</th><th>No. Kontak</th><th>Email</th><th>Progres</th><th>Aksi</th></tr></thead><tbody>${rows}</tbody></table></div>
     <div class="pagination">
       <span class="rowsLabel">Baris per halaman:</span>
-      <select onchange="rowsPerPageKlien=+this.value;pageKlien=1;showPage('klien')">
+      <select onchange="rowsPerPageKlien=+this.value;pageKlien=1;renderKlienPage()">
         <option value="10" ${rpp===10?'selected':''}>10</option>
         <option value="15" ${rpp===15?'selected':''}>15</option>
         <option value="20" ${rpp===20?'selected':''}>20</option>
       </select>
-      <button class="btnSm btnGray" onclick="if(pageKlien>1){pageKlien--;showPage('klien')}" ${pg<=1?'disabled':''}>‹</button>
+      <button class="btnSm btnGray" onclick="pageKlien--;renderKlienPage()" ${pg<=1?'disabled':''}>‹</button>
       <span>Hal ${pg} / ${totalPages} (${total} data)</span>
-      <button class="btnSm btnGray" onclick="if(pageKlien<${totalPages}){pageKlien++;showPage('klien')}" ${pg>=totalPages?'disabled':''}>›</button>
+      <button class="btnSm btnGray" onclick="pageKlien++;renderKlienPage()" ${pg>=totalPages?'disabled':''}>›</button>
     </div>
   </div>`;
 }
@@ -522,14 +522,14 @@ function renderPekerjaan(fK='',fS='',fP='',fU='',q='',pg=1,rpp=rowsPerPagePek){
     }).join(''):`<tr><td colspan="10" style="color:var(--sub);text-align:center;padding:20px">Tidak ada data</td></tr>`;
     const pagination=`<div class="pagination">
       <span class="rowsLabel">Baris per halaman:</span>
-      <select onchange="rowsPerPagePek=+this.value;pagePek=1;showPage('pekerjaan')">
+      <select onchange="rowsPerPagePek=+this.value;pagePek=1;renderPekerjaanPage()">
         <option value="10" ${rpp===10?'selected':''}>10</option>
         <option value="15" ${rpp===15?'selected':''}>15</option>
         <option value="20" ${rpp===20?'selected':''}>20</option>
       </select>
-      <button class="btnSm btnGray" onclick="if(pagePek>1){pagePek--;showPage('pekerjaan')}" ${pg<=1?'disabled':''}>‹</button>
+      <button class="btnSm btnGray" onclick="pagePek--;renderPekerjaanPage()" ${pg<=1?'disabled':''}>‹</button>
       <span>Hal ${pg} / ${totalPages} (${total} data)</span>
-      <button class="btnSm btnGray" onclick="if(pagePek<${totalPages}){pagePek++;showPage('pekerjaan')}" ${pg>=totalPages?'disabled':''}>›</button>
+      <button class="btnSm btnGray" onclick="pagePek++;renderPekerjaanPage()" ${pg>=totalPages?'disabled':''}>›</button>
     </div>`;
     viewContent=`<div style="overflow-x:auto"><table><thead><tr><th>Pekerjaan</th><th>Klien</th><th>Kategori</th><th>Status</th><th>Prioritas</th><th>Dikerjakan</th><th>Tgl</th><th>Deadline</th><th>Waktu</th><th>Aksi</th></tr></thead><tbody>${rows}</tbody></table></div>${pagination}`;
   } else if(currentView==='board'){
@@ -582,6 +582,7 @@ function applyFlt(){
   const fP=document.getElementById('fltP')?.value||'';
   const fU=document.getElementById('fltU')?.value||'';
   const q=document.getElementById('srchPek')?.value||'';
+  pagePek=1;
   document.getElementById('pageContent').innerHTML=renderPekerjaan(fK,fS,fP,fU,q,pagePek,rowsPerPagePek);
 }
 function dragKanban(e,id){dragId=id;e.dataTransfer.effectAllowed='move';}
@@ -1246,6 +1247,19 @@ function newDocFromPek(pId){
       }
     },100);
   },100);
+}
+function renderKlienPage(){
+  const q=document.getElementById('srchKlien')?.value||'';
+  document.getElementById('pageContent').innerHTML=renderKlien(q,pageKlien,rowsPerPageKlien);
+}
+
+function renderPekerjaanPage(){
+  const fK=document.getElementById('fltK')?.value||'';
+  const fS=document.getElementById('fltS')?.value||'';
+  const fP=document.getElementById('fltP')?.value||'';
+  const fU=document.getElementById('fltU')?.value||'';
+  const q=document.getElementById('srchPek')?.value||'';
+  document.getElementById('pageContent').innerHTML=renderPekerjaan(fK,fS,fP,fU,q,pagePek,rowsPerPagePek);
 }
 // ===== NOTIFIKASI =====
 function getNotifs(){
